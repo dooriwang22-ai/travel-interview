@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>국내여행안내사 면접관 시뮬레이터</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --line: #d8e0ea;
+      --text: #1f2937;
+      --sub: #667085;
+      --accent: #1d4ed8;
+      --soft: #eef4ff;
+      --good: #0f766e;
+      --warn: #b45309;
+      --bad: #b91c1c;
+      --shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Pretendard", "Noto Sans KR", Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #eff5ff 0%, #f8fbff 38%, #f3f6fb 100%);
+      line-height: 1.6;
+    }
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #173a91 54%, #2563eb 100%);
+      color: #fff;
+      padding: 28px;
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(1.7rem, 3vw, 2.4rem);
+      line-height: 1.25;
+    }
+    .hero p {
+      margin: 0;
+      color: rgba(255,255,255,0.9);
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 20px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card-head {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      background: #fcfdff;
+    }
+    .card-head h2, .card-head h3 {
+      margin: 0;
+      font-size: 1.06rem;
+    }
+    .card-body {
+      padding: 20px;
+    }
+    .status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .badge {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      border: 1px solid #cad9ff;
+      background: var(--soft);
+      color: var(--accent);
+    }
+    .question-box {
+      border: 1px solid #dbe7ff;
+      background: #f8fbff;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .question-label {
+      font-size: 0.88rem;
+      color: var(--sub);
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .question-text {
+      margin: 0;
+      font-size: 1.08rem;
+      font-weight: 800;
+    }
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      font: inherit;
+      outline: none;
+      resize: vertical;
+      background: #fff;
+    }
+    textarea:focus {
+      border-color: #9dbbff;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+    }
+    button:hover { transform: translateY(-1px); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .primary { background: var(--accent); color: #fff; }
+    .primary:hover { background: #1742b7; }
+    .secondary { background: #e7efff; color: #173b90; }
+    .danger { background: #fee2e2; color: var(--bad); }
+    .result-section {
+      display: none;
+      margin-top: 18px;
+      gap: 14px;
+    }
+    .result-section.show { display: grid; }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      background: #fff;
+    }
+    .panel h4 {
+      margin: 0 0 10px;
+      font-size: 0.98rem;
+    }
+    .score-box {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .score-item {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fafcff;
+      text-align: center;
+    }
+    .score-item strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 1.18rem;
+      color: #173b90;
+    }
+    .list {
+      margin: 0;
+      padding-left: 18px;
+    }
+    .list li + li { margin-top: 8px; }
+    .good-title { color: var(--good); }
+    .warn-title { color: var(--warn); }
+    .answer-box {
+      white-space: pre-wrap;
+      border: 1px solid #dbe7ff;
+      background: #fbfdff;
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .mini {
+      color: var(--sub);
+      font-size: 0.92rem;
+    }
+    .history-list {
+      display: grid;
+      gap: 12px;
+      max-height: 760px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+    .history-item {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: #fff;
+    }
+    .history-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .history-question {
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .history-answer {
+      color: var(--sub);
+      font-size: 0.94rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .empty {
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+      background: #fafcff;
+      text-align: center;
+      padding: 22px 12px;
+      color: var(--sub);
+    }
+    .footer-note {
+      margin-top: 14px;
+      color: var(--sub);
+      font-size: 0.9rem;
+    }
+    @media (max-width: 920px) {
+      .layout { grid-template-columns: 1fr; }
+      .score-box { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .wrap { padding: 14px; }
+      .hero { padding: 20px; }
+      .card-body, .card-head { padding: 16px; }
+      .controls { flex-direction: column; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>국내여행안내사 자격증 면접관 시뮬레이터</h1>
+      <p>
+        2020년부터 2025년 사이의 국내여행안내사 면접 경향을 반영하여 구성한 실전형 모의면접 페이지입니다.
+        면접관은 친절하지만 엄격한 톤으로 질문하며, 한 번에 한 질문씩 제시하고 답변 평가와 모범답변 2가지를 제공합니다.
+      </p>
+    </section>
+
+    <div class="layout">
+      <main class="card">
+        <div class="card-head">
+          <h2>면접 진행</h2>
+        </div>
+        <div class="card-body">
+          <div class="status">
+            <div class="mini">현재 진행 문항 <strong id="questionNumber">1</strong> / <span id="questionTotal">100</span></div>
+            <div class="badge-row" id="categoryBadges"></div>
+          </div>
+
+          <div class="question-box">
+            <div class="question-label">면접 질문</div>
+            <p class="question-text" id="questionText"></p>
+          </div>
+
+          <label for="answerInput" class="question-label">응시자 답변</label>
+          <textarea id="answerInput" placeholder="여기에 답변을 입력하시면 됩니다. 실제 면접처럼 4문장 이상으로 논리적으로 답변해 보시기 바랍니다."></textarea>
+
+          <div class="controls">
+            <button class="primary" id="submitBtn">답변 제출 및 평가</button>
+            <button class="secondary" id="nextBtn" disabled>다음 질문</button>
+            <button class="secondary" id="restartBtn">처음부터 다시 시작</button>
+          </div>
+
+          <section class="result-section" id="resultSection">
+            <div class="panel">
+              <h4>평가 결과</h4>
+              <div class="score-box" id="scoreBox"></div>
+              <div class="panel" style="margin-top:10px; background:#fbfdff;">
+                <h4>총평</h4>
+                <div id="overallFeedback"></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <h4 class="good-title">잘한 점</h4>
+              <ul class="list" id="strengthList"></ul>
+            </div>
+
+            <div class="panel">
+              <h4 class="warn-title">보완할 점</h4>
+              <ul class="list" id="improveList"></ul>
+            </div>
+
+            <div class="panel">
+              <h4>면접관이 제시하는 답변 1안</h4>
+              <div class="answer-box" id="modelAnswerA"></div>
+            </div>
+
+            <div class="panel">
+              <h4>면접관이 제시하는 답변 2안</h4>
+              <div class="answer-box" id="modelAnswerB"></div>
+            </div>
+          </section>
+
+          <div class="footer-note">
+            답변 길이, 구조성, 서비스 태도, 관광 전문성, 최신 트렌드 반영 여부를 종합 평가합니다.
+          </div>
+        </div>
+      </main>
+
+      <aside class="card">
+        <div class="card-head">
+          <h3>진행 기록</h3>
+        </div>
+        <div class="card-body">
+          <div class="controls" style="margin-top:0; margin-bottom:14px;">
+            <button class="secondary" id="exportBtn">기록 내보내기</button>
+            <button class="danger" id="clearHistoryBtn">기록 삭제</button>
+          </div>
+          <div id="historyList" class="history-list"></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const categories = [
+      "인성/자질",
+      "상황 대처",
+      "관광 지식",
+      "국내 관광자원 이해",
+      "고객 응대 및 서비스 마인드",
+      "최신 관광 트렌드",
+      "ESG 관광",
+      "로컬관광"
+    ];
+
+    const questionTemplates = {
+      "인성/자질": [
+        "국내여행안내사에게 가장 중요한 자질은 무엇이라고 생각하며, 본인은 그 자질을 어떻게 갖추고 있다고 생각하십니까?",
+        "본인이 국내여행안내사 직무에 적합하다고 판단하는 이유를 말씀해 주시기 바랍니다.",
+        "친절함과 전문성 중 무엇이 더 중요하다고 생각하는지, 그 이유와 함께 설명해 주시기 바랍니다.",
+        "고객과의 신뢰를 형성하기 위해 안내사가 반드시 지켜야 할 태도는 무엇이라고 생각하십니까?",
+        "본인의 강점과 약점이 국내여행안내사 업무에 어떤 영향을 줄 수 있는지 말씀해 주시기 바랍니다."
+      ],
+      "상황 대처": [
+        "일정 지연으로 고객 불만이 커질 때 어떻게 대응하시겠습니까?",
+        "관광객이 버스 출발 시간에 반복적으로 늦는다면 어떻게 지도하시겠습니까?",
+        "고객 두 명이 여행 중 말다툼을 벌이고 있다면 어떤 방식으로 중재하시겠습니까?",
+        "현장에서 예약 누락이 발생했을 때 안내사로서 어떤 순서로 문제를 해결하시겠습니까?",
+        "관광 중 기상 악화로 일정 변경이 불가피할 때 어떻게 안내하시겠습니까?"
+      ],
+      "관광 지식": [
+        "좋은 관광 해설과 단순 정보 전달의 차이를 설명해 주시기 바랍니다.",
+        "문화관광자원을 설명할 때 가장 중요하게 고려해야 할 요소는 무엇이라고 생각하십니까?",
+        "관광객에게 역사 자원을 설명할 때 사실성과 흥미를 어떻게 균형 있게 전달하시겠습니까?",
+        "국내여행안내사가 관광지 사전조사를 철저히 해야 하는 이유를 말씀해 주시기 바랍니다.",
+        "관광 해설에서 스토리텔링이 중요한 이유를 말씀해 주시기 바랍니다."
+      ],
+      "국내 관광자원 이해": [
+        "우리나라의 자연관광자원과 문화관광자원의 차이를 예시와 함께 말씀해 주시기 바랍니다.",
+        "지역 축제를 관광상품과 연결할 때 고려해야 할 점은 무엇이라고 생각하십니까?",
+        "전통시장, 골목길, 로컬카페와 같은 생활형 자원이 관광자원이 될 수 있는 이유를 말씀해 주시기 바랍니다.",
+        "재방문을 유도하는 국내 관광자원의 특징은 무엇이라고 생각하십니까?",
+        "지역 고유의 이야기를 관광 콘텐츠로 발전시키는 방법을 말씀해 주시기 바랍니다."
+      ],
+      "고객 응대 및 서비스 마인드": [
+        "단체 관광객 중 특정 고객이 개인 요구를 강하게 주장할 때 어떻게 조정하시겠습니까?",
+        "고령 관광객이 많은 일정에서 안내사가 특히 신경 써야 할 부분은 무엇이라고 생각하십니까?",
+        "불만을 제기하는 고객에게 사과만 하는 것과 문제를 해결하는 것의 차이를 설명해 주시기 바랍니다.",
+        "고객 만족도를 높이기 위해 안내사가 현장에서 실천할 수 있는 작은 배려에는 무엇이 있습니까?",
+        "서비스 마인드와 원칙 준수 사이에서 균형을 잡는 방법을 말씀해 주시기 바랍니다."
+      ],
+      "최신 관광 트렌드": [
+        "최근 국내관광 트렌드 중 가장 주목할 만한 변화를 하나 선택하여 설명해 주시기 바랍니다.",
+        "개별여행객 증가가 국내여행안내사에게 어떤 기회와 과제를 준다고 생각하십니까?",
+        "SNS와 숏폼 콘텐츠가 관광 소비에 미치는 영향을 말씀해 주시기 바랍니다.",
+        "체험형 관광과 인증형 관광의 차이를 말씀해 주시고, 어느 방향이 더 지속가능하다고 보시는지 설명해 주시기 바랍니다.",
+        "최근 관광객이 여행지에서 기대하는 경험의 수준이 어떻게 달라졌다고 생각하십니까?"
+      ],
+      "ESG 관광": [
+        "국내여행안내사가 현장에서 실천할 수 있는 ESG 요소를 말씀해 주시기 바랍니다.",
+        "환경을 고려한 관광 운영을 위해 안내사가 실무적으로 할 수 있는 일은 무엇이라고 생각하십니까?",
+        "관광객에게 지역 예절과 책임 있는 여행 태도를 안내하는 방법을 말씀해 주시기 바랍니다.",
+        "지속가능한 관광이 단순한 유행이 아닌 이유를 말씀해 주시기 바랍니다.",
+        "이동약자와 고령자를 배려한 관광 운영이 왜 중요한지 설명해 주시기 바랍니다."
+      ],
+      "로컬관광": [
+        "로컬관광이 중요해진 이유와 국내여행안내사의 역할을 말씀해 주시기 바랍니다.",
+        "유명 관광지 중심 여행과 로컬관광의 차이를 설명해 주시기 바랍니다.",
+        "로컬관광이 지역경제에 기여할 수 있는 방식에는 무엇이 있다고 생각하십니까?",
+        "지역 주민의 삶을 존중하는 관광이 왜 필요하다고 생각하십니까?",
+        "안내사가 지역다움을 전달하기 위해 사전에 준비해야 할 것은 무엇이라고 생각하십니까?"
+      ]
+    };
+
+    const trendMap = {
+      "인성/자질": "기본자질 · 직업관",
+      "상황 대처": "민원 · 돌발상황 대응",
+      "관광 지식": "스토리텔링 · 문화해설",
+      "국내 관광자원 이해": "지역성 · 자원해석",
+      "고객 응대 및 서비스 마인드": "고객만족 · 서비스 역량",
+      "최신 관광 트렌드": "개별화 · 체험형 관광",
+      "ESG 관광": "지속가능성 · 책임관광",
+      "로컬관광": "지역상생 · 차별화 콘텐츠"
+    };
+
+    const focusMap = {
+      "인성/자질": ["책임감", "신뢰", "소통", "정확성", "배려"],
+      "상황 대처": ["사과", "신속성", "대안", "설명", "현장조율"],
+      "관광 지식": ["정확성", "스토리텔링", "맥락", "흥미", "전달력"],
+      "국내 관광자원 이해": ["지역성", "차별성", "자원해석", "연계성", "체류가치"],
+      "고객 응대 및 서비스 마인드": ["공감", "원칙", "형평성", "배려", "안정감"],
+      "최신 관광 트렌드": ["체험형", "개별화", "디지털", "로컬", "소비변화"],
+      "ESG 관광": ["환경", "지역상생", "접근성", "책임관광", "예절"],
+      "로컬관광": ["지역다움", "주민", "콘텐츠", "재방문", "상생"]
+    };
+
+    const structureWords = ["우선", "다음으로", "또한", "특히", "마지막으로", "결론적으로"];
+
+    function createModelAnswer(category, question, mode) {
+      const introMap = {
+        "인성/자질": "국내여행안내사는 단순히 관광지를 소개하는 사람이 아니라 고객의 경험과 안전을 함께 책임지는 직무라고 생각합니다.",
+        "상황 대처": "현장에서는 감정 대응과 문제 해결을 분리하여 차분하고 신속하게 대응하는 것이 중요하다고 생각합니다.",
+        "관광 지식": "관광 해설은 사실 전달에 그치지 않고 장소의 의미와 맥락을 이해시키는 과정이라고 생각합니다.",
+        "국내 관광자원 이해": "관광자원은 단순한 장소가 아니라 지역의 이야기와 생활을 담은 콘텐츠라고 생각합니다.",
+        "고객 응대 및 서비스 마인드": "고객 응대에서는 친절함과 원칙을 함께 유지하는 태도가 중요하다고 생각합니다.",
+        "최신 관광 트렌드": "최근 관광은 단순 방문보다 경험의 질과 개별 맞춤성이 더욱 중요해지고 있다고 생각합니다.",
+        "ESG 관광": "지속가능한 관광은 관광객 만족과 지역의 지속가능성을 함께 고려하는 방향이라고 생각합니다.",
+        "로컬관광": "로컬관광의 핵심은 지역 고유의 매력을 해석하고 진정성 있게 전달하는 데 있다고 생각합니다."
+      };
+
+      const detailMap = {
+        "인성/자질": "저는 고객 입장에서 먼저 생각하고, 필요한 정보를 정확하게 전달하며, 끝까지 책임 있게 대응하는 자세가 필요하다고 봅니다.",
+        "상황 대처": "우선 불편을 인정하고 정중히 설명한 뒤, 실행 가능한 대안을 제시하고 전체 일정에 미치는 영향을 최소화해야 합니다.",
+        "관광 지식": "정확한 사실을 바탕으로 고객 눈높이에 맞춘 스토리텔링을 더해야 실제 만족도와 기억에 남는 경험을 만들 수 있습니다.",
+        "국내 관광자원 이해": "특히 지역의 역사, 문화, 생활양식, 식문화 등을 함께 연결해야 관광자원의 매력을 더 입체적으로 전달할 수 있습니다.",
+        "고객 응대 및 서비스 마인드": "개별 요구를 존중하되 전체 고객의 형평성과 안전을 기준으로 판단하는 균형감이 필요합니다.",
+        "최신 관광 트렌드": "따라서 안내사는 트렌드를 이해하고, 체험형 콘텐츠와 정보 전달 방식을 유연하게 조정할 수 있어야 합니다.",
+        "ESG 관광": "예를 들어 지역 상점 이용을 유도하고, 일회용품 사용을 줄이며, 지역 예절을 사전에 안내하는 실천이 가능합니다.",
+        "로컬관광": "안내사는 주민의 삶을 존중하면서도 지역만의 이야기를 관광객이 공감할 수 있도록 전달해야 합니다."
+      };
+
+      const closingA = "결론적으로 국내여행안내사는 설명 능력뿐 아니라 태도, 판단력, 현장 대응력까지 함께 갖추어야 한다고 생각합니다.";
+      const closingB = "결론적으로 저는 관광객 만족, 지역 이해, 안전한 운영이라는 세 가지 축을 균형 있게 실천하는 안내사가 좋은 국내여행안내사라고 생각합니다.";
+
+      if (mode === 1) {
+        return `${introMap[category]} ${detailMap[category]} ${closingA}`;
+      }
+      return `${introMap[category]} 질문의 핵심은 "${question.replace(/^\d+\.\s*/, "")}"에 대해 현장성 있게 답하는 것이라고 생각합니다. ${detailMap[category]} 또한 고객이 체감할 수 있는 예시를 함께 제시하면 답변의 설득력이 높아집니다. ${closingB}`;
+    }
+
+    function buildQuestions() {
+      const list = [];
+      for (let round = 0; round < 12; round += 1) {
+        categories.forEach((category) => {
+          const baseList = questionTemplates[category];
+          const text = baseList[round % baseList.length];
+          list.push({
+            category,
+            trend: trendMap[category],
+            question: `${list.length + 1}. ${text}`,
+            focusKeywords: focusMap[category],
+            modelA: createModelAnswer(category, text, 1),
+            modelB: createModelAnswer(category, text, 2)
+          });
+        });
+      }
+      list.push({
+        category: "상황 대처",
+        trend: trendMap["상황 대처"],
+        question: "97. 외국인 관광객이 포함된 국내 관광 일정에서 언어 오해로 불만이 생겼을 때 어떻게 대응하시겠습니까?",
+        focusKeywords: focusMap["상황 대처"],
+        modelA: createModelAnswer("상황 대처", "외국인 관광객이 포함된 국내 관광 일정에서 언어 오해로 불만이 생겼을 때 어떻게 대응하시겠습니까?", 1),
+        modelB: createModelAnswer("상황 대처", "외국인 관광객이 포함된 국내 관광 일정에서 언어 오해로 불만이 생겼을 때 어떻게 대응하시겠습니까?", 2)
+      });
+      list.push({
+        category: "ESG 관광",
+        trend: trendMap["ESG 관광"],
+        question: "98. 관광지 혼잡 문제를 줄이기 위해 안내사가 현장에서 실천할 수 있는 방법은 무엇이라고 생각하십니까?",
+        focusKeywords: focusMap["ESG 관광"],
+        modelA: createModelAnswer("ESG 관광", "관광지 혼잡 문제를 줄이기 위해 안내사가 현장에서 실천할 수 있는 방법은 무엇이라고 생각하십니까?", 1),
+        modelB: createModelAnswer("ESG 관광", "관광지 혼잡 문제를 줄이기 위해 안내사가 현장에서 실천할 수 있는 방법은 무엇이라고 생각하십니까?", 2)
+      });
+      list.push({
+        category: "로컬관광",
+        trend: trendMap["로컬관광"],
+        question: "99. 잘 알려지지 않은 지역 자원을 관광객에게 매력적으로 소개하려면 어떤 접근이 필요하다고 생각하십니까?",
+        focusKeywords: focusMap["로컬관광"],
+        modelA: createModelAnswer("로컬관광", "잘 알려지지 않은 지역 자원을 관광객에게 매력적으로 소개하려면 어떤 접근이 필요하다고 생각하십니까?", 1),
+        modelB: createModelAnswer("로컬관광", "잘 알려지지 않은 지역 자원을 관광객에게 매력적으로 소개하려면 어떤 접근이 필요하다고 생각하십니까?", 2)
+      });
+      list.push({
+        category: "인성/자질",
+        trend: trendMap["인성/자질"],
+        question: "100. 마지막으로, 면접관에게 본인을 국내여행안내사로 채용해야 하는 이유를 1분 이내로 말씀해 주시기 바랍니다.",
+        focusKeywords: focusMap["인성/자질"],
+        modelA: createModelAnswer("인성/자질", "마지막으로, 면접관에게 본인을 국내여행안내사로 채용해야 하는 이유를 1분 이내로 말씀해 주시기 바랍니다.", 1),
+        modelB: createModelAnswer("인성/자질", "마지막으로, 면접관에게 본인을 국내여행안내사로 채용해야 하는 이유를 1분 이내로 말씀해 주시기 바랍니다.", 2)
+      });
+      return list.slice(0, 100);
+    }
+
+    const questions = buildQuestions();
+
+    const els = {
+      questionNumber: document.getElementById("questionNumber"),
+      questionTotal: document.getElementById("questionTotal"),
+      questionText: document.getElementById("questionText"),
+      answerInput: document.getElementById("answerInput"),
+      submitBtn: document.getElementById("submitBtn"),
+      nextBtn: document.getElementById("nextBtn"),
+      restartBtn: document.getElementById("restartBtn"),
+      resultSection: document.getElementById("resultSection"),
+      scoreBox: document.getElementById("scoreBox"),
+      overallFeedback: document.getElementById("overallFeedback"),
+      strengthList: document.getElementById("strengthList"),
+      improveList: document.getElementById("improveList"),
+      modelAnswerA: document.getElementById("modelAnswerA"),
+      modelAnswerB: document.getElementById("modelAnswerB"),
+      historyList: document.getElementById("historyList"),
+      categoryBadges: document.getElementById("categoryBadges"),
+      exportBtn: document.getElementById("exportBtn"),
+      clearHistoryBtn: document.getElementById("clearHistoryBtn")
+    };
+
+    const STORAGE_KEY = "tour_interview_simulator_v100";
+    let currentIndex = 0;
+    let submitted = false;
+    let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+
+    function renderBadges(question) {
+      els.categoryBadges.innerHTML = `
+        <span class="badge">${question.category}</span>
+        <span class="badge">${question.trend}</span>
+      `;
+    }
+
+    function renderQuestion() {
+      const question = questions[currentIndex];
+      els.questionNumber.textContent = String(currentIndex + 1);
+      els.questionTotal.textContent = String(questions.length);
+      els.questionText.textContent = question.question;
+      renderBadges(question);
+      els.answerInput.value = "";
+      els.answerInput.disabled = false;
+      els.submitBtn.disabled = false;
+      els.nextBtn.disabled = true;
+      els.resultSection.classList.remove("show");
+      submitted = false;
+    }
+
+    function countMatches(text, keywords) {
+      const lower = text.toLowerCase();
+      return keywords.reduce((acc, keyword) => acc + (lower.includes(keyword.toLowerCase()) ? 1 : 0), 0);
+    }
+
+    function makeScoreItem(label, score) {
+      return `<div class="score-item"><div>${label}</div><strong>${score}점</strong></div>`;
+    }
+
+    function evaluateAnswer(answer, question) {
+      const clean = answer.trim();
+      const len = clean.length;
+      const sentenceCount = clean.split(/[.!?\n]|니다\.|합니다\./).filter(Boolean).length;
+      const focusHit = countMatches(clean, question.focusKeywords);
+      const structureHit = countMatches(clean, structureWords);
+
+      let logic = 50 + Math.min(structureHit * 10, 25) + (sentenceCount >= 4 ? 10 : 0);
+      let professionalism = 50 + Math.min(focusHit * 8, 30);
+      let attitude = /고객|배려|공감|안전|책임|신뢰/.test(clean) ? 86 : 68;
+      let completeness = len >= 120 ? 88 : len >= 70 ? 76 : 60;
+
+      logic = Math.min(logic, 95);
+      professionalism = Math.min(professionalism, 95);
+      const total = Math.round((logic + professionalism + attitude + completeness) / 4);
+
+      const strengths = [];
+      const improvements = [];
+
+      if (sentenceCount >= 4) {
+        strengths.push("답변 길이가 지나치게 짧지 않아 면접 답변으로서 기본 형식을 갖추고 있습니다.");
+      } else {
+        improvements.push("답변 분량이 다소 짧습니다. 최소 4문장 이상으로 논리 전개를 분명히 하는 것이 좋습니다.");
+      }
+
+      if (structureHit >= 2) {
+        strengths.push("연결어를 사용하여 답변 흐름이 비교적 명확합니다.");
+      } else {
+        improvements.push("답변의 구조가 다소 평면적입니다. '우선, 다음으로, 마지막으로'와 같은 연결어를 활용해 보시기 바랍니다.");
+      }
+
+      if (focusHit >= 2) {
+        strengths.push("질문 핵심 키워드를 적절히 반영하여 직무 이해도가 드러납니다.");
+      } else {
+        improvements.push("질문의 핵심 요소를 더 직접적으로 반영할 필요가 있습니다. 직무 키워드를 분명하게 넣어 보시기 바랍니다.");
+      }
+
+      if (/안전|책임|배려|공감|형평성|신뢰/.test(clean)) {
+        strengths.push("고객 안전과 신뢰, 배려 관점이 드러나 서비스 직무에 적합한 태도가 보입니다.");
+      } else {
+        improvements.push("서비스 직무인 만큼 안전, 배려, 신뢰와 같은 가치가 답변에 드러나면 더욱 좋습니다.");
+      }
+
+      if (len >= 150) {
+        strengths.push("답변이 비교적 충실하여 면접관이 지원자의 사고방식을 파악하기 좋습니다.");
+      } else {
+        improvements.push("구체적인 예시나 현장 적용 방안을 한 문장 정도 더 보태면 설득력이 높아집니다.");
+      }
+
+      while (strengths.length < 3) {
+        strengths.push("전반적으로 질문 의도를 벗어나지 않고 성실하게 답변하려는 태도가 보입니다.");
+      }
+      while (improvements.length < 3) {
+        improvements.push("답변 말미에 요약 문장을 추가하면 마무리가 더 선명해집니다.");
+      }
+
+      let overall = "친절한 태도는 느껴지지만, 면접 답변으로서는 조금 더 구조적이고 직무 중심적인 표현이 필요합니다.";
+      if (total >= 85) {
+        overall = "전반적으로 안정적인 답변입니다. 질문 의도 파악, 직무 이해, 서비스 태도가 비교적 균형 있게 드러납니다.";
+      } else if (total >= 75) {
+        overall = "기본기는 갖춘 답변입니다. 다만 핵심 키워드와 현장 적용 예시를 조금 더 보강하면 한 단계 더 좋아질 수 있습니다.";
+      } else if (total >= 65) {
+        overall = "답변 방향은 나쁘지 않지만, 구조성과 전문성을 더 분명하게 드러낼 필요가 있습니다.";
+      }
+
+      return {
+        logic,
+        professionalism,
+        attitude,
+        completeness,
+        total,
+        strengths,
+        improvements,
+        overall
+      };
+    }
+
+    function renderEvaluation(result, question, answer) {
+      els.scoreBox.innerHTML = [
+        makeScoreItem("논리성", result.logic),
+        makeScoreItem("전문성", result.professionalism),
+        makeScoreItem("태도", result.attitude),
+        makeScoreItem("완성도", result.completeness)
+      ].join("");
+
+      els.overallFeedback.innerHTML = `<p style="margin:0 0 8px;"><strong>종합점수 ${result.total}점</strong></p><p style="margin:0;">${result.overall}</p>`;
+      els.strengthList.innerHTML = result.strengths.map(item => `<li>${item}</li>`).join("");
+      els.improveList.innerHTML = result.improvements.map(item => `<li>${item}</li>`).join("");
+      els.modelAnswerA.textContent = question.modelA;
+      els.modelAnswerB.textContent = question.modelB;
+      els.resultSection.classList.add("show");
+
+      history.unshift({
+        id: Date.now(),
+        index: currentIndex + 1,
+        category: question.category,
+        trend: question.trend,
+        question: question.question,
+        answer,
+        total: result.total,
+        overall: result.overall,
+        createdAt: new Date().toLocaleString("ko-KR")
+      });
+      history = history.slice(0, 120);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      if (!history.length) {
+        els.historyList.innerHTML = `<div class="empty">아직 저장된 면접 기록이 없습니다.</div>`;
+        return;
+      }
+      els.historyList.innerHTML = history.map(item => `
+        <div class="history-item">
+          <div class="history-top">
+            <span class="badge">문항 ${item.index}</span>
+            <span class="badge">총점 ${item.total}점</span>
+          </div>
+          <div class="mini" style="margin-bottom:6px;">${item.category} · ${item.trend}</div>
+          <div class="history-question">${item.question}</div>
+          <div class="history-answer">${item.answer}</div>
+          <div class="mini" style="margin-top:8px;">${item.createdAt}</div>
+        </div>
+      `).join("");
+    }
+
+    els.submitBtn.addEventListener("click", () => {
+      const answer = els.answerInput.value.trim();
+      if (!answer) {
+        alert("답변을 입력해 주시기 바랍니다.");
+        return;
+      }
+      if (submitted) return;
+      const question = questions[currentIndex];
+      const result = evaluateAnswer(answer, question);
+      renderEvaluation(result, question, answer);
+      submitted = true;
+      els.answerInput.disabled = true;
+      els.submitBtn.disabled = true;
+      els.nextBtn.disabled = false;
+    });
+
+    els.nextBtn.addEventListener("click", () => {
+      currentIndex = (currentIndex + 1) % questions.length;
+      renderQuestion();
+    });
+
+    els.restartBtn.addEventListener("click", () => {
+      currentIndex = 0;
+      renderQuestion();
+    });
+
+    els.exportBtn.addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(history, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "domestic-tour-interview-history.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    els.clearHistoryBtn.addEventListener("click", () => {
+      if (!confirm("저장된 면접 기록을 모두 삭제하시겠습니까?")) return;
+      history = [];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+      renderHistory();
+    });
+
+    renderQuestion();
+    renderHistory();
+  </script>
+</body>
+</html>
